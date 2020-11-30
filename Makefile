@@ -27,13 +27,14 @@ DOCKER_OPTS := \
 			-v ~/.aws:/root/.aws \
 			-v /root/.ssh:/root/.ssh \
 			-v ~/.cache:/root/.cache \
-			-v /data:/data \
 			-v /mnt/fsx/:/mnt/fsx \
 			-v /dev/null:/dev/raw1394 \
 			-v /tmp:/tmp \
 			-v /tmp/.X11-unix/X0:/tmp/.X11-unix/X0 \
 			-v /var/run/docker.sock:/var/run/docker.sock \
+			-v /home/e2r/Desktop/e2r/data:/data/datasets/ \
 			-v ${PWD}:${WORKSPACE} \
+			-v ${PWD}/logs:${WORKSPACE}/logs \
 			-w ${WORKSPACE} \
 			--privileged \
 			--ipc=host \

@@ -1,5 +1,10 @@
+checkpoint:
+    filepath: 'logs/'
+arch:
+    max_epochs: 20
 model:
-    name: 'SelfSupModel'
+    name: 'VelSupModel'
+    # checkpoint_path: "logs/models1"
     optimizer:
         name: 'Adam'
         depth:
@@ -11,8 +16,8 @@ model:
         step_size: 30
         gamma: 0.5
     depth_net:
-        name: 'PackNet01'
-        version: '1A'
+        name: 'DepthResNet' # PackNetSlim01, PackNet01, DepthResNet
+        version: '18pt' #'1A'
     pose_net:
         name: 'PoseNet'
         version: ''
@@ -24,20 +29,22 @@ datasets:
     augmentation:
         image_shape: (192, 640)
     train:
-        batch_size: 4
+        batch_size: 20
         dataset: ['KITTI']
-        path: ['/data/datasets/KITTI_raw']
-        split: ['data_splits/eigen_zhou_files.txt']
+        path: ['/data/datasets/kitti-raw']
+        split: ['splits/eigen_train_files.txt']
         depth_type: ['velodyne']
         repeat: [2]
     validation:
+        batch_size: 12
         dataset: ['KITTI']
-        path: ['/data/datasets/KITTI_raw']
-        split: ['data_splits/eigen_val_files.txt',
-                'data_splits/eigen_test_files.txt']
-        depth_type: ['velodyne']
+        path: ['/data/datasets/kitti-raw']
+        split: ['splits/eigen_val_files.txt',
+                'splits/eigen_train_files.txt']
+        depth_type: ['groundtruth'] # "velodyne", "groundtruth"
     test:
+        batch_size: 12
         dataset: ['KITTI']
-        path: ['/data/datasets/KITTI_raw']
-        split: ['data_splits/eigen_test_files.txt']
-        depth_type: ['velodyne']
+        path: ['/data/datasets/kitti-raw']
+        split: ['splits/eigen_train_files.txt']
+        depth_type: ['groundtruth']
