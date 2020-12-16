@@ -8,6 +8,7 @@ from yacs.config import CfgNode as CN
 cfg = CN()
 cfg.name = ''       # Run name
 cfg.debug = False   # Debugging flag
+cfg.gpu = [0]
 ########################################################################################################################
 ### ARCH
 ########################################################################################################################
@@ -111,8 +112,11 @@ cfg.model.loss.supervised_loss_weight = 0.9     # Supervised loss weight
 cfg.model.depth_net = CN()
 cfg.model.depth_net.name = ''               # Depth network name
 cfg.model.depth_net.checkpoint_path = ''    # Depth checkpoint filepath
-cfg.model.depth_net.version = ''            # Depth network version
+cfg.model.depth_net.enc_version = ''        # Depth encoder network version
+cfg.model.depth_net.dec_version = ''        # Depth decoder network version
+cfg.model.depth_net.version = ''            # Dummy to support previous versions
 cfg.model.depth_net.dropout = 0.0           # Depth network dropout
+cfg.model.depth_net.pretrained = False
 ########################################################################################################################
 ### MODEL.POSE_NET
 ########################################################################################################################

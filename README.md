@@ -10,9 +10,31 @@
 <img width="60%" src="/media/figs/packnet-ddad.gif"/>
 </a>
 
-Official [PyTorch](https://pytorch.org/) implementation of _self-supervised_ monocular depth estimation methods invented by the ML Team at [Toyota Research Institute (TRI)](https://www.tri.global/), in particular for _PackNet_: [**3D Packing for Self-Supervised Monocular Depth Estimation (CVPR 2020 oral)**](https://arxiv.org/abs/1905.02693),
+Unofficial [PyTorch](https://pytorch.org/) fork of _self-supervised_ monocular depth estimation methods invented by the ML Team at [Toyota Research Institute (TRI)](https://www.tri.global/), in particular for _PackNet_: [**3D Packing for Self-Supervised Monocular Depth Estimation (CVPR 2020 oral)**](https://arxiv.org/abs/1905.02693),
 *Vitor Guizilini, Rares Ambrus, Sudeep Pillai, Allan Raventos and Adrien Gaidon*.
 Although self-supervised (i.e. trained only on monocular videos), PackNet outperforms other self, semi, and fully supervised methods. Furthermore, it gets better with input resolution and number of parameters, generalizes better, and can run in real-time (with TensorRT). See [References](#references) for more info on our models.
+
+## Installation 
+
+Install [Packnet](https://github.com/Easy2Ride/packnet-sfm). This will include this current `forPacknet` branch of [Pydnet](https://github.com/zshn25/Pydnet-Pytorch/tree/forPacknet) as a submodule
+
+```
+git clone --recurse-submodules https://github.com/Easy2Ride/packnet-sfm 
+cd packnet-sfm
+pip install -e packnet-sfm
+```
+
+## Model comparisions
+
+The following models were trained and evaluated on KittiRAW at 640x192. The runtimes are measured on same GPU with batch size 16.
+
+| model    | abs_rel |   sq_rel |     rmse | rmse_log |       a1 |       a2 |       a3 |   runtime   | ![input](packnet_sfm/networks/layers/pydnet/test/1.png) |
+|     -    |    -    |     -    |     -    |     -    |     -    |     -    |     -    |    -     |     -    |     -     |     -     |
+|monodepth2 (baseline)|  0.101   |  0.595   |  4.357   |  0.159   |  0.880   |  0.973   |  0.993   | 30 ms | ![monodepth2](media/tests/monodepth2.png) |
+|resnet18_general|   0.095   |  0.633   |  4.172   |  0.149   |  0.896   |  0.977   |  0.993  |    27 ms | ![resnet18_general](media/tests/resnet18_general_095.png)     |
+|resnet18_mobilepydnet|   0.100   |  0.642   |  4.775   |  0.161   |  0.871   |  0.970   |  0.993   | 33.4 ms |![resnet18_mobilepydnet](media/tests/resnet18_mobilepydnet_1.png)     |
+|mobilenetv3_mobilepydnet |  0.137   |  1.400   |  6.477   |  0.202   |  0.824   |  0.951   |  0.983   | 73 ms |![mobilenetv3_mobilepydnet](media/tests/mobilenetv3_mobilepydnet_137.png)     |
+|efficientnetb0_mobilepydnet| 0.099   |  0.591   |  4.357   |  0.151   |  0.886   |  0.976   |  0.994   |76 ms |![mobilenetv3_mobilepydnet](media/tests/efficientnetb0_mobilepydnet_099.png)     |
 
 ## Install
 

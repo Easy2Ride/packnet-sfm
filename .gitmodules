@@ -1,0 +1,4 @@
+[submodule "packnet_sfm/networks/layers/pydnet"]
+	path = packnet_sfm/networks/layers/pydnet
+	url = https://github.com/zshn25/Pydnet-Pytorch.git
+	branch = forPacknet

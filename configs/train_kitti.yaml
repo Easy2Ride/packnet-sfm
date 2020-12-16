@@ -1,10 +1,14 @@
+name: "VelSupModel_resnet18_general_roll"
+gpu: [0,1]
 checkpoint:
     filepath: 'logs/'
+    monitor: "abs_rel" #abs_rel_pp_gt
+    save_top_k: 20
 arch:
-    max_epochs: 20
+    max_epochs: 30
 model:
-    name: 'VelSupModel'
-    # checkpoint_path: "logs/models1"
+    name: 'VelSupModel' # VelSupModel
+    # checkpoint_path: "logs/models"
     optimizer:
         name: 'Adam'
         depth:
@@ -13,11 +17,13 @@ model:
             lr: 0.0002
     scheduler:
         name: 'StepLR'
-        step_size: 30
+        step_size: 20
         gamma: 0.5
     depth_net:
-        name: 'DepthResNet' # PackNetSlim01, PackNet01, DepthResNet
-        version: '18pt' #'1A'
+        name: 'PydDepth' # "PydDepth"  PackNetSlim01, PackNet01, DepthResNet
+        enc_version: 'resnet18' #'1A' mobilepydnet
+        dec_version: "general" #mobilepydnet
+        pretrained: True
     pose_net:
         name: 'PoseNet'
         version: ''
@@ -29,22 +35,22 @@ datasets:
     augmentation:
         image_shape: (192, 640)
     train:
-        batch_size: 20
+        batch_size: 12
         dataset: ['KITTI']
         path: ['/data/datasets/kitti-raw']
         split: ['splits/eigen_train_files.txt']
-        depth_type: ['velodyne']
+        depth_type: ['groundtruth']
         repeat: [2]
     validation:
-        batch_size: 12
+        batch_size: 1
         dataset: ['KITTI']
         path: ['/data/datasets/kitti-raw']
         split: ['splits/eigen_val_files.txt',
                 'splits/eigen_train_files.txt']
         depth_type: ['groundtruth'] # "velodyne", "groundtruth"
     test:
-        batch_size: 12
+        batch_size: 1
         dataset: ['KITTI']
         path: ['/data/datasets/kitti-raw']
-        split: ['splits/eigen_train_files.txt']
+        split: ['splits/eigen_test_files.txt']
         depth_type: ['groundtruth']

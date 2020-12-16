@@ -1,6 +1,7 @@
 # Copyright 2020 Toyota Research Institute.  All rights reserved.
 
 import argparse
+import os
 
 from packnet_sfm.models.model_wrapper import ModelWrapper
 from packnet_sfm.models.model_checkpoint import ModelCheckpoint
@@ -32,11 +33,14 @@ def train(file):
         **.yaml** for a yacs configuration file or a
         **.ckpt** for a pre-trained checkpoint file.
     """
-    # Initialize horovod
-    hvd_init()
-
     # Produce configuration and checkpoint from filename
     config, ckpt = parse_train_file(file)
+    # config.arch.max_epochs=50
+
+    # Initialize horovod
+    if hasattr(config,"gpu"):
+        os.environ["CUDA_VISIBLE_DEVICES"] =  ",".join(str(x) for x in config.gpu) # "0,1"
+    hvd_init()
 
     # Set debug if requested
     set_debug(config.debug)
