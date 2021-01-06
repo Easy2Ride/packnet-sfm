@@ -7,14 +7,16 @@ checkpoint:
 arch:
     max_epochs: 30
 model:
-    name: 'VelSupModel' # VelSupModel
+    name: 'SelfSupModel' # VelSupModel
+    loss: 
+        pose_consistency_loss_weight: 0.05
     # checkpoint_path: "logs/models"
     optimizer:
         name: 'Adam'
         depth:
-            lr: 0.0002
+            lr: 0.0001
         pose:
-            lr: 0.0002
+            lr: 0.0001
     scheduler:
         name: 'StepLR'
         step_size: 20
@@ -25,8 +27,8 @@ model:
         dec_version: "general" #mobilepydnet
         pretrained: True
     pose_net:
-        name: 'PoseNet'
-        version: ''
+        name: 'PoseResNet' #'PoseNet'
+        version: '18pt' # ''
     params:
         crop: 'garg'
         min_depth: 0.0
@@ -34,6 +36,7 @@ model:
 datasets:
     augmentation:
         image_shape: (192, 640)
+        # max_roll_angle: 20
     train:
         batch_size: 12
         dataset: ['KITTI']

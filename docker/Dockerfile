@@ -82,7 +82,7 @@ RUN curl -O https://bootstrap.pypa.io/get-pip.py && \
 # Install Pydata and other deps
 RUN pip install future typing numpy pandas matplotlib jupyter h5py \
     awscli boto3 tqdm termcolor path.py pillow-simd opencv-python-headless \
-    mpi4py onnx onnxruntime pycuda yacs cython==0.29.10
+    mpi4py onnx onnxruntime pycuda yacs cython==0.29.10 timm
 
 # Install PyTorch
 RUN pip install torch==${PYTORCH_VERSION} \

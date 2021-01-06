@@ -454,6 +454,7 @@ def setup_model(config, prepared, **kwargs):
         Created model
     """
     print0(pcolor('Model: %s' % config.name, 'yellow'))
+    # SfmModel, SelfSupModel, VelSupModel loaded
     model = load_class(config.name, paths=['packnet_sfm.models',])(
         **{**config.loss, **kwargs})
     # Add depth network if required
@@ -461,7 +462,7 @@ def setup_model(config, prepared, **kwargs):
         model.add_depth_net(setup_depth_net(config.depth_net, prepared))
     # Add pose network if required
     if model.network_requirements['pose_net']:
-        model.add_pose_net(setup_pose_net(config.pose_net, prepared))
+        model.add_pose_net(setup_pose_net(config.pose_net, prepared,rotation_mode=config.loss.rotation_mode, **kwargs))
     # If a checkpoint is provided, load pretrained model
     if not prepared and config.checkpoint_path is not '':
         model = load_network(model, config.checkpoint_path, 'model')

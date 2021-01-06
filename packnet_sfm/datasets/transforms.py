@@ -1,12 +1,13 @@
 # Copyright 2020 Toyota Research Institute.  All rights reserved.
 
 from functools import partial
+from torchvision import transforms
 from packnet_sfm.datasets.augmentations import resize_image, resize_sample, \
-    duplicate_sample, colorjitter_sample, to_tensor_sample
+    duplicate_sample, colorjitter_sample, to_tensor_sample, rotate_sample
 
 ########################################################################################################################
 
-def train_transforms(sample, image_shape, jittering):
+def train_transforms(sample, image_shape, jittering, max_roll_angle):
     """
     Training data augmentation transformations
 
@@ -29,6 +30,7 @@ def train_transforms(sample, image_shape, jittering):
     sample = duplicate_sample(sample)
     if len(jittering) > 0:
         sample = colorjitter_sample(sample, jittering)
+    sample = rotate_sample(sample,degrees=max_roll_angle)
     sample = to_tensor_sample(sample)
     return sample
 
@@ -74,7 +76,7 @@ def test_transforms(sample, image_shape):
     sample = to_tensor_sample(sample)
     return sample
 
-def get_transforms(mode, image_shape, jittering, **kwargs):
+def get_transforms(mode, image_shape, jittering, max_roll_angle, **kwargs):
     """
     Get data augmentation transformations for each split
 
@@ -95,7 +97,8 @@ def get_transforms(mode, image_shape, jittering, **kwargs):
     if mode == 'train':
         return partial(train_transforms,
                        image_shape=image_shape,
-                       jittering=jittering)
+                       jittering=jittering,
+                       max_roll_angle=max_roll_angle)
     elif mode == 'validation':
         return partial(validation_transforms,
                        image_shape=image_shape)

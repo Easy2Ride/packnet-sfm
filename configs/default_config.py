@@ -102,6 +102,7 @@ cfg.model.loss.padding_mode = 'zeros'           # Photometric loss padding mode
 cfg.model.loss.automask_loss = True             # Automasking to remove static pixels
 #
 cfg.model.loss.velocity_loss_weight = 0.1       # Velocity supervision loss weight
+cfg.model.loss.pose_consistency_loss_weight= 0. # Pose consistency loss weight
 #
 cfg.model.loss.supervised_method = 'sparse-l1'  # Method for depth supervision
 cfg.model.loss.supervised_num_scales = 4        # Number of scales for supervised learning
@@ -135,6 +136,7 @@ cfg.datasets = CN()
 cfg.datasets.augmentation = CN()
 cfg.datasets.augmentation.image_shape = (192, 640)              # Image shape
 cfg.datasets.augmentation.jittering = (0.2, 0.2, 0.2, 0.05)     # Color jittering values
+cfg.datasets.augmentation.max_roll_angle = 0                    # Rotation augmentation
 ########################################################################################################################
 ### DATASETS.TRAIN
 ########################################################################################################################

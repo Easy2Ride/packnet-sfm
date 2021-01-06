@@ -2,8 +2,9 @@
 
 from packnet_sfm.models.SfmModel import SfmModel
 from packnet_sfm.losses.multiview_photometric_loss import MultiViewPhotometricLoss
+from packnet_sfm.losses.pose_consistency_loss import PoseConsistencyLoss
 from packnet_sfm.models.model_utils import merge_outputs
-
+from packnet_sfm.geometry.pose_utils import invert_pose
 
 class SelfSupModel(SfmModel):
     """
@@ -15,18 +16,21 @@ class SelfSupModel(SfmModel):
     kwargs : dict
         Extra parameters
     """
-    def __init__(self, **kwargs):
+    def __init__(self, pose_consistency_loss_weight=0.1, **kwargs):
         # Initializes SfmModel
         super().__init__(**kwargs)
         # Initializes the photometric loss
         self._photometric_loss = MultiViewPhotometricLoss(**kwargs)
+        self.pose_consistency_loss = PoseConsistencyLoss(**kwargs)
+        self.pose_consistency_loss_weight = pose_consistency_loss_weight
 
     @property
     def logs(self):
         """Return logs."""
         return {
             **super().logs,
-            **self._photometric_loss.logs
+            **self._photometric_loss.logs,
+            **self.pose_consistency_loss
         }
 
     def self_supervised_loss(self, image, ref_images, inv_depths, poses,
@@ -90,6 +94,16 @@ class SelfSupModel(SfmModel):
                 batch['rgb_original'], batch['rgb_context_original'],
                 output['inv_depths'], output['poses'], batch['intrinsics'],
                 return_logs=return_logs, progress=progress)
+            if len(batch['rgb_context_original']) == 2 and self.pose_consistency_loss_weight != 0.:
+                pose_contexts = self.compute_poses(batch['rgb_context_original'][0],
+                                                  [batch['rgb_context_original'][1]])
+                pose_consistency_output = self.pose_consistency_loss(
+                                                    invert_pose(output['poses'][0].item()),
+                                                    output['poses'][1].item(),
+                                                    pose_contexts[0].item())
+                pose_consistency_output['loss'] *= self.pose_consistency_loss_weight
+                output = merge_outputs(output, pose_consistency_output)
+                
             # Return loss and metrics
             return {
                 'loss': self_sup_output['loss'],

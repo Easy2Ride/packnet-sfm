@@ -3,7 +3,11 @@
 import cv2
 import numpy as np
 import random
+import torch
 import torchvision.transforms as transforms
+import torchvision.transforms.functional as TF
+from packnet_sfm.geometry.camera_utils import scale_intrinsics
+
 from PIL import Image
 
 from packnet_sfm.utils.misc import filter_dict
@@ -78,10 +82,9 @@ def resize_sample_image_and_intrinsics(sample, shape,
     for key in filter_dict(sample, [
         'intrinsics'
     ]):
-        intrinsics = np.copy(sample[key])
-        intrinsics[0] *= out_w / orig_w
-        intrinsics[1] *= out_h / orig_h
-        sample[key] = intrinsics
+        sample[key] = scale_intrinsics(np.copy(sample[key]),
+                                        out_w / orig_w, 
+                                        out_h / orig_h)
     # Scale images
     for key in filter_dict(sample, [
         'rgb', 'rgb_original',
@@ -234,6 +237,38 @@ def colorjitter_sample(sample, parameters, prob=1.0):
     # Return jittered (?) sample
     return sample
 
+def rotate_sample(sample, degrees=20):
+    """
+    Rotates input images as data augmentation.
+
+    Parameters
+    ----------
+    sample : dict
+        Input sample
+    degrees : float
+        Jittering probability
+
+    Returns
+    -------
+    sample : dict
+        Jittered sample
+    """    
+    if degrees == 0:
+        return sample
+    # Do same rotation transform for image and context imgs
+    rand_degree = (torch.rand(1)-0.5)*2*degrees
+    # Jitter single items
+    for key in filter_dict(sample, [
+        'rgb', 'rgb_original', 'depth',
+    ]):
+        sample[key] = TF.rotate(sample[key], rand_degree)
+    # Jitter lists
+    for key in filter_dict(sample, [
+        'rgb_context', 'rgb_context_original', 'depth_context'
+    ]):
+        sample[key] = [TF.rotate(k,rand_degree) for k in sample[key]]
+    # Return jittered (?) sample
+    return sample
 ########################################################################################################################
 
 
