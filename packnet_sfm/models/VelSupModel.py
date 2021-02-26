@@ -2,7 +2,7 @@
 
 from packnet_sfm.models.SelfSupModel import SelfSupModel
 from packnet_sfm.losses.velocity_loss import VelocityLoss
-
+import torch
 
 class VelSupModel(SelfSupModel):
     """
@@ -45,7 +45,7 @@ class VelSupModel(SelfSupModel):
             for logging and downstream usage.
         """
         output = super().forward(batch, return_logs, progress)
-        if self.training:
+        if self.training and not torch.isnan(batch['pose_context'][0]).any():
             # Update self-supervised loss with velocity supervision
             velocity_loss = self._velocity_loss(output['poses'], batch['pose_context'])
             output['loss'] += self.velocity_loss_weight * velocity_loss['loss']

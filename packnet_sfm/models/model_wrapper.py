@@ -32,13 +32,14 @@ class ModelWrapper(torch.nn.Module):
         Model configuration (cf. configs/default_config.py)
     """
 
-    def __init__(self, config, resume=None, logger=None, load_datasets=True):
+    def __init__(self, config, resume=None, logger=None, load_datasets=True, use_horovod=True):
         super().__init__()
 
         # Store configuration, checkpoint and logger
         self.config = config
         self.logger = logger
         self.resume = resume
+        self.use_horovod = use_horovod
 
         # Set random seed
         set_random_seed(config.arch.seed)
@@ -217,7 +218,8 @@ class ModelWrapper(torch.nn.Module):
 
         # Calculate and reduce average loss and metrics per GPU
         loss_and_metrics = average_loss_and_metrics(output_batch, 'avg_train')
-        loss_and_metrics = reduce_dict(loss_and_metrics, to_item=True)
+        if self.use_horovod:
+            loss_and_metrics = reduce_dict(loss_and_metrics, to_item=True)
 
         # Log to wandb
         if self.logger:
@@ -234,7 +236,7 @@ class ModelWrapper(torch.nn.Module):
 
         # Reduce depth metrics
         metrics_data = all_reduce_metrics(
-            output_data_batch, self.validation_dataset, self.metrics_name)
+            output_data_batch, self.validation_dataset, self.metrics_name, use_horovod=self.use_horovod)
 
         # Create depth dictionary
         metrics_dict = create_dict(
@@ -259,7 +261,7 @@ class ModelWrapper(torch.nn.Module):
 
         # Reduce depth metrics
         metrics_data = all_reduce_metrics(
-            output_data_batch, self.test_dataset, self.metrics_name)
+            output_data_batch, self.test_dataset, self.metrics_name, use_horovod=self.use_horovod)
 
         # Create depth dictionary
         metrics_dict = create_dict(

@@ -9,6 +9,6 @@ Inspired by pytorch-lightning.
 
 """
 
-from packnet_sfm.trainers.horovod_trainer import HorovodTrainer
-
-__all__ = ["HorovodTrainer"]
+# from packnet_sfm.trainers.horovod_trainer import HorovodTrainer
+from packnet_sfm.trainers.pytorch_trainer import PytorchTrainer
+__all__ = [ "PytorchTrainer"]

@@ -143,3 +143,9 @@ WORKDIR /workspace/${PROJECT}
 WORKDIR /workspace/${PROJECT}
 COPY . /workspace/${PROJECT}
 ENV PYTHONPATH="/workspace/${PROJECT}:$PYTHONPATH"
+
+# Install nanodet
+WORKDIR /workspace
+RUN git clone https://github.com/RangiLyu/nanodet.git && \
+    cd nanodet && \
+    python setup.py develop

@@ -21,20 +21,33 @@ Install [Packnet](https://github.com/Easy2Ride/packnet-sfm). This will include t
 ```
 git clone --recurse-submodules https://github.com/Easy2Ride/packnet-sfm 
 cd packnet-sfm
-pip install -e packnet-sfm
+pip install -e .
 ```
 
 ## Model comparisions
 
-The following models were trained and evaluated on KittiRAW at 640x192. The runtimes are measured on same GPU with batch size 16.
+The following models were trained and evaluated on KittiRAW at 640x192 with velocity supervision. The runtimes are measured on same GPU with batch size 1.
 
 | model    | abs_rel |   sq_rel |     rmse | rmse_log |       a1 |       a2 |       a3 |   runtime   | ![input](packnet_sfm/networks/layers/pydnet/test/1.png) |
 |     -    |    -    |     -    |     -    |     -    |     -    |     -    |     -    |    -     |     -    |     -     |     -     |
 |monodepth2 (baseline)|  0.101   |  0.595   |  4.357   |  0.159   |  0.880   |  0.973   |  0.993   | 30 ms | ![monodepth2](media/tests/monodepth2.png) |
-|resnet18_general|   0.095   |  0.633   |  4.172   |  0.149   |  0.896   |  0.977   |  0.993  |    27 ms | ![resnet18_general](media/tests/resnet18_general_095.png)     |
+|resnet18_general| 0.095   |  0.545   |  4.124   |  0.149   |  0.893   |  0.977   |  0.993   |  27 ms | ![resnet18_general](media/tests/resnet18_general_095.png)     |
 |resnet18_mobilepydnet|   0.100   |  0.642   |  4.775   |  0.161   |  0.871   |  0.970   |  0.993   | 33.4 ms |![resnet18_mobilepydnet](media/tests/resnet18_mobilepydnet_1.png)     |
 |mobilenetv3_mobilepydnet |  0.137   |  1.400   |  6.477   |  0.202   |  0.824   |  0.951   |  0.983   | 73 ms |![mobilenetv3_mobilepydnet](media/tests/mobilenetv3_mobilepydnet_137.png)     |
 |efficientnetb0_mobilepydnet| 0.099   |  0.591   |  4.357   |  0.151   |  0.886   |  0.976   |  0.994   |76 ms |![mobilenetv3_mobilepydnet](media/tests/efficientnetb0_mobilepydnet_099.png)     |
+|resnet18_general (pose_con)| 0.088   |  0.523   |  3.973   |  0.141   |  0.907   |  0.980   |  0.994   |  27 ms | ![resnet18_general](media/tests/resnet18_general_posecon.png)     |
+
+## Ablation:
+
+Depth_GT of pose consistency without and with SelfSupModel with same eval loss
+ToDo: Check the scale ratios
+
+| model    | abs_rel |   sq_rel |     rmse | rmse_log |       a1 |       a2 |       a3 | 
+|     -    |    -    |     -    |     -    |     -    |     -    |     -    |     -    |    -     |
+|resnet18_general|  0.089   |  0.519   |  3.878   |  0.136   |  0.915   |  0.982   |  0.995   |
+|resnet18_general_pose|  0.088   |  0.504   |  3.846   |  0.134   |  0.917   |  0.982   |  0.995   | 
+|resnet18_general_fullpose|  |  0.087   |  0.506   |  3.810   |  0.132   |  0.920   |  0.984   |  0.995   |
+
 
 ## Install
 
@@ -63,6 +76,11 @@ For instance, to verify that the environment is setup correctly, you can run a s
 curl -s https://tri-ml-public.s3.amazonaws.com/github/packnet-sfm/datasets/KITTI_tiny.tar | tar xv -C /data/datasets/
 # in docker
 make docker-run COMMAND="python3 scripts/train.py configs/overfit_kitti.yaml"
+```
+
+
+```bash
+make docker-run COMMAND="python3 scripts/eval.py --checkpoint logs/models/epoch=22_kitti-raw-eigen_val_files-groundtruth-abs_rel_pp_gt=0.069.ckpt --config configs/train_kitti.yaml"
 ```
 
 If you want to use features related to [AWS](https://aws.amazon.com/) (for dataset access)

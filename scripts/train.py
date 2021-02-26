@@ -5,11 +5,18 @@ import os
 
 from packnet_sfm.models.model_wrapper import ModelWrapper
 from packnet_sfm.models.model_checkpoint import ModelCheckpoint
-from packnet_sfm.trainers.horovod_trainer import HorovodTrainer
+# 
+from packnet_sfm.trainers.pytorch_trainer import PytorchTrainer
 from packnet_sfm.utils.config import parse_train_file
 from packnet_sfm.utils.load import set_debug, filter_args_create
 from packnet_sfm.utils.horovod import hvd_init, rank
-from packnet_sfm.loggers import WandbLogger
+
+try:
+    import horovod.torch as hvd
+    HAS_HOROVOD = True
+except ImportError:
+    HAS_HOROVOD = False
+# from packnet_sfm.loggers import WandbLogger
 
 
 def parse_args():
@@ -46,18 +53,22 @@ def train(file):
     set_debug(config.debug)
 
     # Wandb Logger
-    logger = None if config.wandb.dry_run or rank() > 0 \
-        else filter_args_create(WandbLogger, config.wandb)
+    logger = None# if config.wandb.dry_run or rank() > 0 \
+        # else filter_args_create(WandbLogger, config.wandb)
 
     # model checkpoint
     checkpoint = None if config.checkpoint.filepath is '' or rank() > 0 else \
         filter_args_create(ModelCheckpoint, config.checkpoint)
 
     # Initialize model wrapper
-    model_wrapper = ModelWrapper(config, resume=ckpt, logger=logger)
+    model_wrapper = ModelWrapper(config, resume=ckpt, logger=logger, use_horovod=HAS_HOROVOD)
 
     # Create trainer with args.arch parameters
-    trainer = HorovodTrainer(**config.arch, checkpoint=checkpoint)
+    if HAS_HOROVOD:
+        from packnet_sfm.trainers.horovod_trainer import HorovodTrainer
+        trainer = HorovodTrainer(checkpoint=checkpoint, **config.arch)
+    else:
+        trainer = PytorchTrainer(checkpoint=checkpoint, **config.arch)
 
     # Train model
     trainer.fit(model_wrapper)

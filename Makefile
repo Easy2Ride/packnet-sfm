@@ -38,7 +38,7 @@ DOCKER_OPTS := \
 			-w ${WORKSPACE} \
 			--privileged \
 			--ipc=host \
-			--network=host
+			# --network=host
 
 NGPUS=$(shell nvidia-smi -L | wc -l)
 MPI_CMD=mpirun \
@@ -64,6 +64,7 @@ clean:
 
 docker-build:
 	docker build \
+		--network=host \
 		-f docker/Dockerfile \
 		-t ${DOCKER_IMAGE} .
 

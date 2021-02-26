@@ -6,6 +6,7 @@ import random
 import torch
 import torchvision.transforms as transforms
 import torchvision.transforms.functional as TF
+import torch.nn.functional as F
 from packnet_sfm.geometry.camera_utils import scale_intrinsics
 
 from PIL import Image
@@ -240,35 +241,89 @@ def colorjitter_sample(sample, parameters, prob=1.0):
 def rotate_sample(sample, degrees=20):
     """
     Rotates input images as data augmentation.
+    Assumes the intrinsics to be scaled w.r.t the image. i.e. this step should be followed by (image &intrinsics) resizing
 
     Parameters
     ----------
     sample : dict
         Input sample
     degrees : float
-        Jittering probability
+        sample a random rotation angle between [-degrees,, degrees]
 
     Returns
     -------
     sample : dict
-        Jittered sample
+        Rotated sample
+
+    Author: Zeeshan Khan Suri
     """    
     if degrees == 0:
         return sample
     # Do same rotation transform for image and context imgs
     rand_degree = (torch.rand(1)-0.5)*2*degrees
+    # Get rotation center as principal point from intrinsic matrix
+    center=sample["intrinsics"][:2,2]
     # Jitter single items
     for key in filter_dict(sample, [
-        'rgb', 'rgb_original', 'depth',
+        'rgb', 'rgb_original', 'depth'
     ]):
-        sample[key] = TF.rotate(sample[key], rand_degree)
+        sample[key] = TF.rotate(sample[key], rand_degree.item(),
+                                resample=Image.NEAREST if key=='depth' else Image.BILINEAR,
+                                center=center.tolist())
     # Jitter lists
     for key in filter_dict(sample, [
         'rgb_context', 'rgb_context_original', 'depth_context'
     ]):
-        sample[key] = [TF.rotate(k,rand_degree) for k in sample[key]]
-    # Return jittered (?) sample
+        sample[key] = [TF.rotate(k,rand_degree.item(),
+                                 resample=Image.NEAREST if key=='depth_context' else Image.BILINEAR,
+                                 center=center.tolist()) 
+                for k in sample[key]]
+    # Return rotated (?) sample
     return sample
+
+
+def random_center_crop_sample(sample, size=None):
+    """
+    Random center crops of sample as data augmentation.
+
+    Parameters
+    ----------
+    sample : dict
+        Input sample
+    size : (sequence of (h,w))
+        Desired output size of the crop. (h, w)
+
+    Returns
+    -------
+    sample : dict
+        Cropped sample
+    """
+    
+    (w, h) = sample['rgb'].size
+    if size:
+        crop_h = list(range(64,h+1,32)) # Since network needs multiples of 32
+        crop_h = np.random.choice(crop_h,p=crop_h/np.sum(crop_h))
+        crop_w = list(range(64,w+1,32))
+        crop_w = np.random.choice(crop_w,p=crop_w/np.sum(crop_w))
+    else:
+        crop_h, crop_w = size
+    center_crop = transforms.CenterCrop((crop_h, crop_w))
+
+    # Center cropping does **not** change (normalized) image intrinsics but position changes
+    sample["intrinsics"][0,2] = sample["intrinsics"][0,2]*(crop_w/w)
+    sample["intrinsics"][1,2] = sample["intrinsics"][1,2]*(crop_h/h)
+
+    # So, only cropping the rest
+    for key in filter_dict(sample, [
+        'rgb', 
+    ]):
+        sample[key] = center_crop(sample[key])
+    # Jitter lists
+    for key in filter_dict(sample, [
+        'rgb_context',
+    ]):
+        sample[key] = [center_crop(k) for k in sample[key]]
+    # Return random cropped (?) sample
+    return sample
+
 ########################################################################################################################
-
-

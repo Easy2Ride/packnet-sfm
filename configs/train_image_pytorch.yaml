@@ -1,0 +1,65 @@
+name: "VelSupModel_resnet18_general_Zero_acquisition"
+gpu: [1]
+checkpoint:
+    filepath: 'logs/'
+    # Track with GT scale for SelfSupModel and without for Vel
+    monitor: "abs_rel" # "loss" #abs_rel_pp_gt
+    save_top_k: -1
+arch:
+    max_epochs: 40
+model:
+    name: 'VelSupModel' # VelSupModel
+    # loss: 
+        # rotation_mode: "matrix" # "euler"
+        # pose_consistency_loss_weight: 0.05
+    # checkpoint_path: "logs/models"
+    optimizer:
+        name: 'Adam'
+        depth:
+            lr: 0.0001
+        pose:
+            lr: 0.0001
+    scheduler:
+        name: 'StepLR'
+        step_size: 20
+        gamma: 0.5
+    depth_net:
+        name: 'PydDepth' # "PydDepth"  PackNetSlim01, PackNet01, DepthResNet
+        enc_version: 'resnet18' #'1A' mobilepydnet
+        dec_version: "general" #mobilepydnet
+        pretrained: True
+    pose_net:
+        name: 'PoseResNet' #'PoseNet'
+        version: '18pt' # ''
+    params:
+        crop: 'garg'
+        min_depth: 0.0
+        max_depth: 80.0
+datasets:
+    augmentation:
+        image_shape: (192, 640)
+        # max_roll_angle: 20
+    train:
+        batch_size: 18
+        dataset: ['KITTI', 'Image', 'Image']
+        path: ['../data/kitti-raw', # supposed to be run from easy2ride_pipel
+                '/media/e2r/Volume/e2r/data/acquisition_2-7/undist/',
+               '/media/e2r/Volume/e2r/data/zerobike/ZeroData_Raw/train']
+        split: ['splits/eigen_train_files.txt',
+                "frame_{}",
+                "frame_{:06d}"]
+        depth_type: ['groundtruth',"", ""]
+        repeat: [2,1,2]
+    validation:
+        batch_size: 1
+        dataset: ['KITTI']
+        path: ['../data/kitti-raw']
+        split: ['splits/eigen_val_files.txt',
+                'splits/eigen_test_files.txt']
+        depth_type: ['groundtruth'] # "velodyne", "groundtruth"
+    test:
+        batch_size: 1
+        dataset: ['KITTI']
+        path: ['../data/kitti-raw']
+        split: ['splits/eigen_test_files.txt']
+        depth_type: ['groundtruth']

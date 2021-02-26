@@ -7,9 +7,19 @@ from torch.utils.data import Dataset
 import numpy as np
 from packnet_sfm.utils.image import load_image
 
+from packnet_sfm.datasets.augmentations import resize_sample, random_center_crop_sample
+
 ########################################################################################################################
 #### FUNCTIONS
 ########################################################################################################################
+
+Kzero=np.array([[655.4526442798641, 0.0             , 939.3564129071235],
+                [0.0              , 655.229038531984, 536.3086826317193],
+                [0.0              , 0.0             , 1.0              ]])
+
+Kacquisition=np.array([[407.5891, 0.0     , 648.9632],
+                       [0.0     , 407.7303, 360.3419],
+                       [0.0     , 0.0     , 1.0     ]])
 
 def dummy_calibration(image):
     w, h = [float(d) for d in image.size]
@@ -95,17 +105,34 @@ class ImageDataset(Dataset):
         session, filename = self.files[idx]
         image = self._read_rgb_file(session, filename)
 
+        # intrinsics
+        if "zero" in self.root_dir.lower():
+            intrinsics=Kzero
+        elif "acquisition" in self.root_dir.lower():
+            intrinsics = Kacquisition
+        else:
+            intrinsics = dummy_calibration(image)
+
+        # dict to return
         sample = {
             'idx': idx,
             'filename': '%s_%s' % (session, os.path.splitext(filename)[0]),
             #
+            'pose': np.ones((4,4))*np.nan, # placeholder
             'rgb': image,
-            'intrinsics': dummy_calibration(image)
+            'intrinsics': intrinsics
         }
 
         if self.has_context:
             sample['rgb_context'] = \
                 self._read_rgb_context_files(session, filename)
+
+        # Placeholder for pose context
+        sample['pose_context'] = [np.ones((4,4))*np.nan for i in sample['rgb_context']]
+
+        # Resize sample perserving aspect ratio
+        sample=resize_sample(sample, shape=(360,640))
+        sample=random_center_crop_sample(sample, size=(192,640))
 
         if self.data_transform:
             sample = self.data_transform(sample)
