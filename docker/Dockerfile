@@ -82,7 +82,7 @@ RUN curl -O https://bootstrap.pypa.io/get-pip.py && \
 # Install Pydata and other deps
 RUN pip install future typing numpy pandas matplotlib jupyter h5py \
     awscli boto3 tqdm termcolor path.py pillow-simd opencv-python-headless \
-    mpi4py onnx onnxruntime pycuda yacs cython==0.29.10 timm
+    mpi4py onnx onnxruntime pycuda yacs cython==0.29.10
 
 # Install PyTorch
 RUN pip install torch==${PYTORCH_VERSION} \
@@ -123,7 +123,7 @@ ENTRYPOINT ["/tini", "-g", "--"]
 
 # Install DGP (dataset utils)
 WORKDIR /workspace
-RUN git clone https://github.com/TRI-ML/dgp.git \
+RUN git clone https://github.com/shyam573/dgp \
     && cd dgp \
     && pip3 install -r requirements.txt
 ENV PYTHONPATH="/workspace/dgp:$PYTHONPATH"
@@ -143,9 +143,3 @@ WORKDIR /workspace/${PROJECT}
 WORKDIR /workspace/${PROJECT}
 COPY . /workspace/${PROJECT}
 ENV PYTHONPATH="/workspace/${PROJECT}:$PYTHONPATH"
-
-# Install nanodet
-WORKDIR /workspace
-RUN git clone https://github.com/RangiLyu/nanodet.git && \
-    cd nanodet && \
-    python setup.py develop

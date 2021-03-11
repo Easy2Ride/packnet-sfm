@@ -538,6 +538,15 @@ def setup_dataset(config, mode, requirements, **kwargs):
                 config.path[i], config.split[i],
                 **dataset_args, **dataset_args_i,
             )
+            
+        # Cityscapes dataset
+        elif config.dataset[i] == 'Cityscapes':
+            from packnet_sfm.datasets.cityscapes_dataset import CityscapesDataset
+            dataset = CityscapesDataset(
+                config.path[i], path_split,
+                **dataset_args, **dataset_args_i,
+            )
+            
         else:
             ValueError('Unknown dataset %d' % config.dataset[i])
 

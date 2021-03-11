@@ -23,15 +23,12 @@ class DepthResNet(nn.Module):
     kwargs : dict
         Extra parameters
     """
-    def __init__(self, version=None, **kwargs):
+    def __init__(self, enc_version=None, pretrained=True, **kwargs):
         super().__init__()
-        assert version is not None, "DispResNet needs a version"
+        assert enc_version is not None, "DispResNet needs a version"
+       
 
-        num_layers = int(version[:2])       # First two characters are the number of layers
-        pretrained = version[2:] == 'pt'    # If the last characters are "pt", use ImageNet pretraining
-        assert num_layers in [18, 34, 50], 'ResNet version {} not available'.format(num_layers)
-
-        self.encoder = ResnetEncoder(num_layers=num_layers, pretrained=pretrained)
+        self.encoder = ResnetEncoder(enc_type=enc_version, pretrained=pretrained)
         self.decoder = DepthDecoder(num_ch_enc=self.encoder.num_ch_enc)
         self.scale_inv_depth = partial(disp_to_depth, min_depth=0.1, max_depth=100.0)
 

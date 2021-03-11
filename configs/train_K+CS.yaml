@@ -27,7 +27,7 @@ model:
         dec_version: "general" #mobilepydnet
         pretrained: True
     pose_net:
-        name: 'PoseIntrResNet' #'PoseNet', 'PoseResNet', 'PoseIntrResNet'
+        name: 'PoseResNet' #'PoseNet'
         version: 'resnet18_swsl-pt' # ''
     params:
         crop: 'garg'
@@ -39,11 +39,11 @@ datasets:
         # max_roll_angle: 20
     train:
         batch_size: 12
-        dataset: ['KITTI']
-        path: ['/data/datasets/kitti_raw']  
-        split: ['splits/eigen_zhou_files.txt']
-        depth_type: ['velodyne']
-        repeat: [2]
+        dataset: ['Cityscapes']  #['KITTI', 'Image']
+        path: ['/data/datasets/cityscapes_data']  #['/data/datasets/kitti_raw']
+        split: ['train'] #'splits/eigen_zhou_files.txt', 
+        depth_type: ['']  #'groundtruth'
+        repeat: [1]
     validation:
         dataset: ['KITTI']
         path: ['/data/datasets/kitti_raw']

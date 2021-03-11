@@ -111,12 +111,19 @@ class SfmModel(nn.Module):
         # Return inverse depth maps
         return inv_depths
 
+                
     def compute_poses(self, image, contexts):
         """Compute poses from image and a sequence of context images"""
         pose_vec = self.pose_net(image, contexts)
-        return [Pose.from_vec(pose_vec[:, i], self.rotation_mode)
-                for i in range(pose_vec.shape[1])]
-
+        if len(pose_vec)==2:
+            pose_vec, intr_K = pose_vec
+            return [Pose.from_vec(pose_vec[:, i], self.rotation_mode)
+            for i in range(pose_vec.shape[1])], intr_K
+                
+        else:
+            return [Pose.from_vec(pose_vec[:, i], self.rotation_mode)
+            for i in range(pose_vec.shape[1])], None
+            
     def forward(self, batch, return_logs=False):
         """
         Processes a batch.
@@ -138,10 +145,12 @@ class SfmModel(nn.Module):
         # Generate pose predictions if available
         pose = None
         if 'rgb_context' in batch and self.pose_net is not None:
-            pose = self.compute_poses(batch['rgb'],
-                                      batch['rgb_context'])
+            pose, intr_K = self.compute_poses(batch['rgb'],
+        		batch['rgb_context'])
+                                       
         # Return output dictionary
         return {
             'inv_depths': inv_depths,
             'poses': pose,
+            'intrinsics': intr_K,
         }

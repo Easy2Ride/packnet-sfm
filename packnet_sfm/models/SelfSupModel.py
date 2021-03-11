@@ -89,14 +89,18 @@ class SelfSupModel(SfmModel):
             # If not training, no need for self-supervised loss
             return output
         else:
+            #print(batch['intrinsics'], output['intrinsics'])
+            if output['intrinsics'] is None:
+                output['intrinsics'] = batch['intrinsics']
             # Otherwise, calculate self-supervised loss
             self_sup_output = self.self_supervised_loss(
                 batch['rgb_original'], batch['rgb_context_original'],
-                output['inv_depths'], output['poses'], batch['intrinsics'],
+                output['inv_depths'], output['poses'], output['intrinsics'],
                 return_logs=return_logs, progress=progress)
             if len(batch['rgb_context_original']) == 2 and self.pose_consistency_loss_weight != 0.:
-                pose_contexts = self.compute_poses(batch['rgb_context_original'][0],
+                pose_contexts, _ = self.compute_poses(batch['rgb_context_original'][0],
                                                   [batch['rgb_context_original'][1]])
+  
                 pose_consistency_output = self.pose_consistency_loss(
                                                     invert_pose(output['poses'][0].item()),
                                                     output['poses'][1].item(),
