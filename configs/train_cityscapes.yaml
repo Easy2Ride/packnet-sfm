@@ -1,4 +1,4 @@
-name: "VelSupModel_resnet18_general_roll"
+name: "VelSupModel_resnet18_general_roll_Cityscapes"
 gpu: [0,1]
 checkpoint:
     filepath: 'logs/'
@@ -39,21 +39,21 @@ datasets:
         # max_roll_angle: 20
     train:
         batch_size: 12
-        dataset: ['KITTI']
-        path: ['/media/focal/storage/kitti_data']
-        split: ['splits/eigen_train_files.txt']
-        depth_type: ['groundtruth']
+        dataset: ['Cityscapes']
+        path: ['/media/focal/storage/cityscapes']
+        split: ['cityscapes_splits/train_files.txt']
+        depth_type: ['']
         repeat: [2]
     validation:
         batch_size: 1
-        dataset: ['KITTI']
-        path: ['/media/focal/storage/kitti_data']
-        split: ['splits/eigen_val_files.txt',
-                'splits/eigen_train_files.txt']
-        depth_type: ['groundtruth'] # "velodyne", "groundtruth"
+        dataset: ['Cityscapes']
+        path: ['/media/focal/storage/cityscapes']
+        split: ['cityscapes_splits/val_files.txt',
+                'cityscapes_splits/train_files.txt']
+        depth_type: [''] # "velodyne", "groundtruth"
     test:
         batch_size: 1
-        dataset: ['KITTI']
-        path: ['/media/focal/storage/kitti_data']
-        split: ['splits/eigen_test_files.txt']
-        depth_type: ['groundtruth']
+        dataset: ['Cityscapes']
+        path: ['/media/focal/storage/cityscapes']
+        split: ['cityscapes_splits/val_files.txt']
+        depth_type: ['']

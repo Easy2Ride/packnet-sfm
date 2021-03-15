@@ -118,6 +118,7 @@ class KITTIDataset(Dataset):
                 if depth is not None and os.path.exists(depth):
                     self.paths.append(path)
 
+        print(self.paths[:10])
         # If using context, filter file list
         if self.with_context:
             paths_with_context = []
@@ -402,6 +403,8 @@ class KITTIDataset(Dataset):
         # Apply transformations
         if self.data_transform:
             sample = self.data_transform(sample)
+
+        
 
         # Return sample
         return sample
